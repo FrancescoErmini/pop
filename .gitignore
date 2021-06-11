@@ -5,3 +5,4 @@ old_results
 *.ipynb
 *.sqlite
 __pycache__
+.idea
