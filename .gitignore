@@ -1,0 +1,7 @@
+pop
+.ipy*
+results
+old_results
+*.ipynb
+*.sqlite
+__pycache__

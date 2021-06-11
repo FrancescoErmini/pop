@@ -1,0 +1,107 @@
+import ee
+import time
+import logging
+
+ee.Authenticate()
+ee.Initialize()
+
+def create_reduce_region_function(geometry,
+                                  reducer=ee.Reducer.mean(),
+                                  scale=1000,
+                                  crs='EPSG:4326',
+                                  bestEffort=True,
+                                  maxPixels=1e13,
+                                  tileScale=4):
+  """Creates a region reduction function.
+
+  Creates a region reduction function intended to be used as the input function
+  to ee.ImageCollection.map() for reducing pixels intersecting a provided region
+  to a statistic for each image in a collection. See ee.Image.reduceRegion()
+  documentation for more details.
+
+  Args:
+    geometry:
+      An ee.Geometry that defines the region over which to reduce data.
+    reducer:
+      Optional; An ee.Reducer that defines the reduction method.
+    scale:
+      Optional; A number that defines the nominal scale in meters of the
+      projection to work in.
+    crs:
+      Optional; An ee.Projection or EPSG string ('EPSG:5070') that defines
+      the projection to work in.
+    bestEffort:
+      Optional; A Boolean indicator for whether to use a larger scale if the
+      geometry contains too many pixels at the given scale for the operation
+      to succeed.
+    maxPixels:
+      Optional; A number specifying the maximum number of pixels to reduce.
+    tileScale:
+      Optional; A number representing the scaling factor used to reduce
+      aggregation tile size; using a larger tileScale (e.g. 2 or 4) may enable
+      computations that run out of memory with the default.
+
+  Returns:
+    A function that accepts an ee.Image and reduces it by region, according to
+    the provided arguments.
+  """
+
+  def reduce_region_function(img):
+    """Applies the ee.Image.reduceRegion() method.
+
+    Args:
+      img:
+        An ee.Image to reduce to a statistic by region.
+
+    Returns:
+      An ee.Feature that contains properties representing the image region
+      reduction results per band and the image timestamp formatted as
+      milliseconds from Unix epoch (included to enable time series plotting).
+    """
+
+    stat = img.reduceRegion(
+        reducer=reducer,
+        geometry=geometry,
+        scale=scale,
+        crs=crs,
+        bestEffort=bestEffort,
+        maxPixels=maxPixels,
+        tileScale=tileScale)
+
+    return ee.Feature(geometry, stat).set({'millis': img.date().millis()})
+  return reduce_region_function
+
+# Define a function to transfer feature properties to a dictionary.
+def fc_to_dict(fc):
+  prop_names = fc.first().propertyNames()
+  prop_lists = fc.reduceColumns(
+      reducer=ee.Reducer.toList().repeat(prop_names.size()),
+      selectors=prop_names).get('list')
+
+  return ee.Dictionary.fromLists(prop_names, prop_lists)
+
+
+
+pdsi = ee.ImageCollection('GRIDMET/DROUGHT').select('pdsi')
+aoi = ee.FeatureCollection('EPA/Ecoregions/2013/L3').filter(
+    ee.Filter.eq('na_l3name', 'Sierra Nevada')).geometry()
+
+
+reduce_pdsi = create_reduce_region_function(
+    geometry=aoi, reducer=ee.Reducer.mean(), scale=5000, crs='EPSG:3310')
+
+pdsi_stat_fc = ee.FeatureCollection(pdsi.map(reduce_pdsi)).filter(
+    ee.Filter.notNull(pdsi.first().bandNames()))
+
+task = ee.batch.Export.table.toAsset(
+    collection=pdsi_stat_fc,
+    description='pdsi_stat_fc export',
+    assetId='users/pop/pdsi_stat_fc_ts_vis_with_altair')
+
+task.start()
+
+while task.active():
+    print('Polling for task (id: %s).' % task.id)
+    time.sleep(5)
+
+pdsi_stat_fc = ee.FeatureCollection('users/pop/pdsi_stat_fc_ts_vis_with_altair')
