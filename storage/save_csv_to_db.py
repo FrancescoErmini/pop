@@ -15,7 +15,7 @@ def save_csv_to_db(file_name):
     cur = conn.cursor()
     try:
 
-        table_name = os.path.basename(file_name).split('_')[0]
+        table_name = os.path.basename(file_name).split('_')[0].lower()
         print(table_name)
     except Exception:
         print("not valid file name")
