@@ -57,13 +57,10 @@ def update_geojson():
         geom = geojson.loads(row['AsGeoJSON(geometry)'])
         # remove the geometry field from the current's row's dictionary
         row.pop('AsGeoJSON(geometry)')
-        # merge ndvi values for this id
+        # merge indexes values for this id
         poly_id = row.get('poly_id')
-        values = all_indexes.get(str(poly_id), None)
-        if values:
-            properties = {**row, **values}
-        else:
-            properties = row
+        values = all_indexes[str(poly_id)]
+        properties = {**row, **values}
 
         feature = geojson.Feature(geometry=geom, properties=properties)
         featureCollection.append(feature)
@@ -74,7 +71,7 @@ def update_geojson():
         geojson.dump(featureCollection, f)
 
 
-def get_indexes(conn):
+def get_indexes(conn= sqlite3.connect('../pop.sqlite')):
     """
     Retrieve all index from db and return a dictionary of ids, each with retrieved indexes and values.
 
@@ -90,7 +87,10 @@ def get_indexes(conn):
     """
     all_indexes = None
     for index_name in INDEXES_NAMES:
-        results = conn.execute('SELECT poly_id, value, datetime FROM %s' % index_name).fetchall()
+        results = conn.execute('SELECT poly_id, value, datetime FROM %s ORDER BY poly_id' % index_name).fetchall()
+        for raw in results:
+            poly_id = raw[0]
+
         indexes = {}
         for raw in results:
             poly_id = raw[0]
@@ -99,10 +99,11 @@ def get_indexes(conn):
             if poly_id not in indexes.keys():
                 indexes[poly_id] = {index_name: [(value, datetime)]}
             else:
-                indexes[poly_id][index_name].append((value, datetime))
-                # sort array of value by datetime value
-                indexes[poly_id][index_name] = sorted(indexes[poly_id][index_name], key=lambda tup: int(tup[1]), reverse=True)
-                #indexes[poly_id][index_name].sort(key=lambda tup: int(tup[1]), reverse=True)
+                if len(indexes[poly_id][index_name]) < 7:
+                    indexes[poly_id][index_name].append((value, datetime))
+                    # sort array of value by datetime value
+                    indexes[poly_id][index_name] = sorted(indexes[poly_id][index_name], key=lambda tup: int(tup[1]), reverse=True)
+                    #indexes[poly_id][index_name].sort(key=lambda tup: int(tup[1]), reverse=True)
 
         if all_indexes is None:
             all_indexes = indexes
@@ -111,3 +112,5 @@ def get_indexes(conn):
 
     # print(all_indexes)
     return all_indexes
+
+update_geojson()

@@ -28,5 +28,3 @@ def save_csv_to_db(file_name):
     cur.executemany(query, to_db)
     conn.commit()
     conn.close()
-
-
