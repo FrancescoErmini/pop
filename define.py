@@ -7,5 +7,5 @@ RESULTS_DIR = os.path.join(BASE_DIR, 'results')
 OLD_RESULTS_DIR = os.path.join(BASE_DIR, 'old_results')
 
 
-INDEXES_NAMES = ['ndvi', 'ri']
+INDEXES_NAMES = ['ndvi', 'ri', 'ci', 'cigreen', 'cvi', 'evi', 'gndvi', 'grvi', 'nbr', 're1', 're2']
 PADDING_VALUE = -999999

@@ -2,7 +2,7 @@ import os
 import ee
 import pandas as pd
 from gee.fc_to_dict import fc_to_dict
-from define import RESULTS_DIR, PADDING_VALUE
+from define import RESULTS_DIR, PADDING_VALUE, INDEXES_NAMES
 
 
 ee.Initialize()
@@ -25,16 +25,18 @@ def save_gee_asset_to_csv(asset_name: str):
     :param asset_name: 'i.e users/pop/GNDVI_time_series'
     :return: Nothing
     """
+    # FIXME: mange asset_name input exception:
+    # Bad asset naming convention...asset name must start with <index_name>_something ( like datetime )
+    index_name = asset_name.split('/')[-1].split('_')[0].lower()
+    if index_name not in INDEXES_NAMES:
+        raise Exception("Unknown index: please write index in the define.py file.")
+
     # collect data from cloud.
     pdsi_stat_fc = ee.FeatureCollection(asset_name)
     # convert data into python dict with keys the cols (datetime) of the asset table.
     #  Example:
     # {"20170410": [0.4406072106261859, 0.7077798861480076, 0.6768953068592057..]
     pdsi_dict = fc_to_dict(pdsi_stat_fc).getInfo()
-
-    # FIXME: mange asset_name input exception:
-    # Bad asset naming convention...asset name must start with <index_name>_something ( like datetime )
-    index_name = asset_name.split('/')[-1].split('_')[0].lower()
 
     # get the len of the dataset ( how many poly there are )
     array_len = len(pdsi_dict['id'])
