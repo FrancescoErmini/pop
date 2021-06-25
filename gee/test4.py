@@ -5,22 +5,22 @@ import logging
 #ee.Authenticate()
 ee.Initialize()
 
-def create_reduce_region_function(
-                                  geometry,
+
+def create_reduce_region_function(geometry,
                                   reducer=ee.Reducer.mean(),
                                   scale=1000,
                                   crs='EPSG:4326',
                                   bestEffort=True,
                                   maxPixels=1e13,
                                   tileScale=4):
-  """Creates a region reduction function.
+    """Creates a region reduction function.
 
-  Creates a region reduction function intended to be used as the input function
-  to ee.ImageCollection.map() for reducing pixels intersecting a provided region
-  to a statistic for each image in a collection. See ee.Image.reduceRegion()
-  documentation for more details.
+    Creates a region reduction function intended to be used as the input function
+    to ee.ImageCollection.map() for reducing pixels intersecting a provided region
+    to a statistic for each image in a collection. See ee.Image.reduceRegion()
+    documentation for more details.
 
-  Args:
+    Args:
     geometry:
       An ee.Geometry that defines the region over which to reduce data.
     reducer:
@@ -42,35 +42,35 @@ def create_reduce_region_function(
       aggregation tile size; using a larger tileScale (e.g. 2 or 4) may enable
       computations that run out of memory with the default.
 
-  Returns:
+    Returns:
     A function that accepts an ee.Image and reduces it by region, according to
     the provided arguments.
-  """
-
-  def reduce_region_function(img):
-    """Applies the ee.Image.reduceRegion() method.
-
-    Args:
-      img:
-        An ee.Image to reduce to a statistic by region.
-
-    Returns:
-      An ee.Feature that contains properties representing the image region
-      reduction results per band and the image timestamp formatted as
-      milliseconds from Unix epoch (included to enable time series plotting).
     """
 
-    stat = img.reduceRegion(
-        reducer=reducer,
-        geometry=geometry,
-        scale=scale,
-        crs=crs,
-        bestEffort=bestEffort,
-        maxPixels=maxPixels,
-        tileScale=tileScale)
+    def reduce_region_function(img):
+        """Applies the ee.Image.reduceRegion() method.
 
-    return ee.Feature(geometry, stat).set({'imageID': img.id()})
-  return reduce_region_function
+        Args:
+          img:
+            An ee.Image to reduce to a statistic by region.
+
+        Returns:
+          An ee.Feature that contains properties representing the image region
+          reduction results per band and the image timestamp formatted as
+          milliseconds from Unix epoch (included to enable time series plotting).
+        """
+
+        stat = img.reduceRegion(
+            reducer=reducer,
+            geometry=geometry,
+            scale=scale,
+            crs=crs,
+            bestEffort=bestEffort,
+            maxPixels=maxPixels,
+            tileScale=tileScale)
+
+        return ee.Feature(geometry, stat).set({'imageID': img.id()})
+    return reduce_region_function
 
 
 
@@ -86,8 +86,8 @@ aoi_fc = ee.FeatureCollection('users/fgiannettigenedop/pioppi_Achille').map(
 aoi = aoi_fc.geometry()
 print(str(aoi_fc.first().get('Regione').getInfo()) + ' informazioni poligoni pioppo')
 
-startDate = '2017-04-01'
-endDate = '2017-09-30'
+startDate = '2020-01-01'
+endDate = '2020-01-03'
 
 
 pdsi = ee.ImageCollection('COPERNICUS/S2_SR')\
@@ -97,6 +97,7 @@ pdsi = ee.ImageCollection('COPERNICUS/S2_SR')\
             
 print(pdsi.first().bandNames().getInfo())
 
+# callback
 reduce_pdsi = create_reduce_region_function(
     geometry=aoi, reducer=ee.Reducer.mean(), scale=5000, crs='EPSG:3310')
 

@@ -2,7 +2,26 @@ import ee
 from gee.assets_to_csv import save_gee_asset_to_csv
 from gee.assets_db import update_assets_done, get_assets_done
 from define import INDEXES_NAMES
+from gee.get_assets_name import fetch_gee_table_assets_names
+
 ee.Initialize()
+
+"""
+Fetch google earth engine assets and save them locally under csv results folder.
+
+1. Retreive the assets present in gee for this account
+2. Note:
+    asset must be saved under name convention:
+    <name_index>_<datetime>
+    ndvi_20210621
+    
+2. compare the assets names retrieved from cloud with the 
+    names tretrived from db ( names of asset already processed )
+    
+3. If some asset have not yet processed, then process it
+   ( save assets done to csv ).
+   
+"""
 
 
 def has_valid_asset_name(asset_name):
@@ -16,9 +35,7 @@ def has_valid_asset_name(asset_name):
         return False
 
 
-folder = ee.data.getAssetRoots()[0]['id']
-assets = ee.data.listAssets({'parent': folder})
-assets_names = [asset['id'] for asset in assets['assets'] if asset['type'] == 'TABLE']
+assets_names = fetch_gee_table_assets_names()
 
 # retreive from db asset_names already done
 assets_names_already_done = get_assets_done()

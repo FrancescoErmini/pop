@@ -36,7 +36,11 @@ pdsi_stat_fc = ee.FeatureCollection(collection.map(
                     #ndvi = ee.List([feature.get('ndvi'), -9999]).reduce(ee.Reducer.firstNonNull())
                     )
 )).filter(
-    ee.Filter.notNull(collection.first().bandNames()))
+    ee.Filter.notNull(collection.first().bandNames())
+)
+
+
+
 
 task = ee.batch.Export.table.toAsset(
     collection=pdsi_stat_fc,

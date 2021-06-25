@@ -88,9 +88,6 @@ def get_indexes(conn= sqlite3.connect('../pop.sqlite')):
     all_indexes = None
     for index_name in INDEXES_NAMES:
         results = conn.execute('SELECT poly_id, value, datetime FROM %s ORDER BY poly_id' % index_name).fetchall()
-        for raw in results:
-            poly_id = raw[0]
-
         indexes = {}
         for raw in results:
             poly_id = raw[0]
@@ -113,4 +110,3 @@ def get_indexes(conn= sqlite3.connect('../pop.sqlite')):
     # print(all_indexes)
     return all_indexes
 
-update_geojson()
