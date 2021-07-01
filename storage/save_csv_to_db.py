@@ -7,9 +7,19 @@ import sqlite3
 
 def save_csv_to_db(file_name):
     """
-    Read
-    :param file_name:
-    :return:
+    Read data from csv and collect result in the corresponding db table (append to older values).
+    The table name is derived from file name, by split on '_' char.
+
+    Example:
+        file_name = /path/to/ndvi_1234.csv
+        db_table = 'ndvi'
+
+    Arguments:
+        file_name(str): full path to csv file
+
+    Note:
+        csv must have 3 column named: poly_id, value, datetime.
+
     """
     conn = sqlite3.connect('../pop.sqlite')
     cur = conn.cursor()

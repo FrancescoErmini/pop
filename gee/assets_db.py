@@ -16,8 +16,9 @@ def update_assets_done(assets_names: list):
 
 
 def get_assets_done():
+    """ Return the list of asset_names already processed locally """
     conn = sqlite3.connect('../pop.sqlite')
     query = "SELECT name FROM assets_done"
     res = conn.execute(query).fetchall()
     conn.commit()
-    return res
+    return [asset[0] for asset in res]

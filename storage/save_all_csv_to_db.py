@@ -2,7 +2,6 @@
 STORAGE ROUTINE:
 1. read csv files in sources directory ( written by gee routine)
 2. update result by saving csv data to spatial lite database.
-3. Re-generate the geojson with new data
 """
 
 import os
@@ -28,7 +27,7 @@ def main():
         shutil.move(os.path.join(RESULTS_DIR, result_file), os.path.join(OLD_RESULTS_DIR, result_file))
 
     # update geojson
-    update_geojson()
+    #update_geojson()
 
 
 if __name__ == "__main__":

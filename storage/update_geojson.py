@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import geojson
-from define import INDEXES_NAMES, GEOJSON_DIR
+from define import INDEXES_NAMES, GEOJSON_DIR, DB_SRC_ASSET_NAME
 from mergedeep import merge
 
 
@@ -31,7 +31,8 @@ def update_geojson():
     conn.execute('SELECT load_extension("mod_spatialite.so")')
     # Get the indexes dictionary that will be merge in the goe json
     all_indexes = get_indexes(conn)
-
+    if not bool(all_indexes):
+        return False
     # function that makes query results return lists of dictionaries instead of lists of tuples
     def dict_factory(cursor, row):
         d = {}
@@ -42,14 +43,8 @@ def update_geojson():
     # apply the function to the sqlite3 engine
     conn.row_factory = dict_factory
 
-    getResultsQuery = """
-    SELECT
-        AsGeoJSON(geometry),
-        poly_id
-    FROM
-        pioppeti
-    ;
-    """
+    getResultsQuery = f"SELECT AsGeoJSON(geometry), poly_id FROM {DB_SRC_ASSET_NAME};"
+
     # fetch the results in form of a list of dictionaries
     results = conn.execute(getResultsQuery).fetchall()
     featureCollection = list()
@@ -71,7 +66,7 @@ def update_geojson():
         geojson.dump(featureCollection, f)
 
 
-def get_indexes(conn= sqlite3.connect('../pop.sqlite')):
+def get_indexes(conn=sqlite3.connect('../pop.sqlite')):
     """
     Retrieve all index from db and return a dictionary of ids, each with retrieved indexes and values.
 
@@ -110,3 +105,5 @@ def get_indexes(conn= sqlite3.connect('../pop.sqlite')):
     # print(all_indexes)
     return all_indexes
 
+
+update_geojson()

@@ -3,14 +3,15 @@ from gee.assets_to_csv import save_gee_asset_to_csv
 from gee.assets_db import update_assets_done, get_assets_done
 from define import INDEXES_NAMES
 from gee.get_assets_name import fetch_gee_table_assets_names
+from validators import has_valid_asset_name
 
 ee.Initialize()
 
 """
-Fetch google earth engine assets and save them locally under csv results folder.
+Fetch google earth engine table assets and save them locally under RESULTS_DIR folder.
 
-1. Retreive the assets present in gee for this account
-2. Note:
+1. Retreive the assets present in gee for this account, 
+   FILTER with name convention:
     asset must be saved under name convention:
     <name_index>_<datetime>
     ndvi_20210621
@@ -23,23 +24,10 @@ Fetch google earth engine assets and save them locally under csv results folder.
    
 """
 
-
-def has_valid_asset_name(asset_name):
-    try:
-        index_name = asset_name.split('/')[-1].split('_')[0]
-        if index_name.lower() not in INDEXES_NAMES:
-            raise ValueError("Index name not defined")
-        return True
-    except Exception:
-        print("not valid asset: "+ asset_name)
-        return False
-
-
 assets_names = fetch_gee_table_assets_names()
 
 # retreive from db asset_names already done
 assets_names_already_done = get_assets_done()
-assets_names_already_done = [asset[0] for asset in assets_names_already_done]
 
 # filter the assets from gee cloud to kept only the newest asset ( not processed yet )
 assets_names_to_be_done = [asset_name for asset_name in assets_names
@@ -48,8 +36,11 @@ assets_names_to_be_done = [asset_name for asset_name in assets_names
 
 for asset_name in assets_names_to_be_done:
     # save asset from gee cloud to local csv file
+    print("Found new  asset")
     save_gee_asset_to_csv(asset_name)
-    #  register this asset as done
+
+    # TODO: Log when / how many assets are found.
+    # register this asset as done
     update_assets_done([asset_name])
 
 

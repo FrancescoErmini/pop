@@ -3,26 +3,30 @@ import ee
 import pandas as pd
 from gee.fc_to_dict import fc_to_dict
 from define import RESULTS_DIR, PADDING_VALUE, INDEXES_NAMES
+from define import GEE_POLY_ID
 
-
-ee.Initialize()
+#ee.Initialize()
 
 
 def save_gee_asset_to_csv(asset_name: str):
     """
-    Retrieve from cloud the asset and save csv files.
-    Asset cols must be datetime, so one file csv per datetime is generated.
+    Retrieve from gee cloud the asset table data given as input (i.e users/pop/GNDVI_time_series')
+    and save locally, in results folder, the csv files generated .
+
+    Asset in google earth engine must be formatted as a time series table.
+    In other words, the columns are the time line (with dates in ISO format),
+    and rows are polygons IDs.
+
+    One asset table (file) in gee will generate many csv files: one file csv per datetime.
+    In this way, each csv file will report all "values" observed for each polygon in a specific date.
+
+    Deep down with an Example:
 
     Asset in google cloud feature table must be as:
-    20170410', '20170411' .. '20170420', '20170421', 'id', 'system:index'
+    20170410', '20170411' .. '20170420', '20170421', 'poly_id', 'system:index'
     0.0001,     0.0000012,.. 0.000145,   0.0991    , 00000000000000000008, <empty>
     ..
-
-    Output csv must be compliant for reading.
-    Delimeter is ;
-    cols are poly_id, values, datetime
-
-    :param asset_name: 'i.e users/pop/GNDVI_time_series'
+    :param asset_name: '
     :return: Nothing
     """
     # FIXME: mange asset_name input exception:
@@ -39,12 +43,12 @@ def save_gee_asset_to_csv(asset_name: str):
     pdsi_dict = fc_to_dict(pdsi_stat_fc).getInfo()
 
     # get the len of the dataset ( how many poly there are )
-    array_len = len(pdsi_dict['id'])
+    array_len = len(pdsi_dict[GEE_POLY_ID])
 
     # iterate over datetime cols
     for prop in pdsi_dict.keys():
         # skip col that do not carry values
-        if prop == 'id' or prop == 'system:index':
+        if prop == GEE_POLY_ID or prop == 'system:index':
             continue
         # add null / -99999 padding to have all arrays of values of the same length.
         cur_array_len = len(pdsi_dict[prop])
@@ -56,7 +60,7 @@ def save_gee_asset_to_csv(asset_name: str):
         # initialize dataframe with the col of values
         pdsi_df = pd.DataFrame({'value': pdsi_dict[prop]})
         # add the col of ids
-        pdsi_df.insert(0, 'poly_id', pdsi_dict['id'])
+        pdsi_df.insert(0, 'poly_id', pdsi_dict[GEE_POLY_ID])
         # add the col of datetime ( which is the same since we do one file per datetime )
         pdsi_df['datetime'] = [prop for i in range(array_len)]
         pdsi_dir = os.path.join(RESULTS_DIR, f"{index_name.lower()}_{prop}.csv")
