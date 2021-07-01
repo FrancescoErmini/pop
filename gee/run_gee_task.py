@@ -16,6 +16,8 @@ ee.Initialize()
     ..
 
 """
+
+
 aoi_fc = get_feature_collection('users/pop/' + GEE_SRC_ASSET_NAME)
 
 
@@ -38,3 +40,5 @@ task.start()
 while task.active():
     print('Polling for task (id: %s).' % task.id)
     time.sleep(5)
+
+

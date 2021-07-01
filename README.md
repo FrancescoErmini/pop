@@ -21,8 +21,20 @@ Note 2: Projected coordinated are nneded by leaflet in order to correcly show po
 SETUP SERVER
 ==========================
 
-Copy server/index.html on /var/www/pop/html/ ( or whatever nginx uses )
-Set in define.py GEOJSON_NAME to /var/www/pop/html/pop.geojson
-( so that the goejson file will be create in that direcotry )
+Go to /var/www/pop/html/ ( or whatever nginx uses )
+and use symlinks to point those file:
+geojson/pop.geojson
+server/index.html
+```
+frer@dev:/var/www/pop/html$ ll
+total 8
+drwxrwxr-x 2 frer frer 4096 lug  1 15:21 ./
+drwxr-xr-x 3 frer frer 4096 giu 10 14:48 ../
+lrwxrwxrwx 1 frer frer   43 lug  1 12:01 index.html -> /home/frer/workspace/pop2/server/index.html
+lrwxrwxrwx 1 frer frer   45 lug  1 12:11 pop.geojson -> /home/frer/workspace/pop2/geojson/pop.geojson
+frer@dev:/var/www/pop/html$ 
+```
+
+
 
 
