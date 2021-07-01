@@ -1,7 +1,7 @@
 import os
 import sqlite3
 import geojson
-from define import INDEXES_NAMES, GEOJSON_DIR, DB_SRC_ASSET_NAME
+from define import INDEXES_NAMES, GEOJSON_DIR, DB_SRC_ASSET_NAME, PADDING_VALUE, INDEX_MAX_LEN, GEOJSON_NAME
 from mergedeep import merge
 
 
@@ -62,7 +62,7 @@ def update_geojson():
 
     featureCollection = geojson.FeatureCollection(featureCollection)
 
-    with open(GEOJSON_DIR, 'w') as f:
+    with open(os.path.join(GEOJSON_DIR, GEOJSON_NAME), 'w') as f:
         geojson.dump(featureCollection, f)
 
 
@@ -91,12 +91,16 @@ def get_indexes(conn=sqlite3.connect('../pop.sqlite')):
             if poly_id not in indexes.keys():
                 indexes[poly_id] = {index_name: [(value, datetime)]}
             else:
-                if len(indexes[poly_id][index_name]) < 7:
-                    indexes[poly_id][index_name].append((value, datetime))
-                    # sort array of value by datetime value
-                    indexes[poly_id][index_name] = sorted(indexes[poly_id][index_name], key=lambda tup: int(tup[1]), reverse=True)
-                    #indexes[poly_id][index_name].sort(key=lambda tup: int(tup[1]), reverse=True)
-
+                #if len(indexes[poly_id][index_name]) < 7:
+                indexes[poly_id][index_name].append((value, datetime))
+        for poly_id in indexes.keys():
+            # filter null values
+            indexes[poly_id][index_name] = [tup for tup in indexes[poly_id][index_name] if str(tup[0]) != str(PADDING_VALUE)+'.0']
+            #sort array of value by datetime value
+            indexes[poly_id][index_name] = sorted(indexes[poly_id][index_name], key=lambda tup: int(tup[1]), reverse=True)
+            # truncate array on max
+            indexes[poly_id][index_name] = indexes[poly_id][index_name][0:INDEX_MAX_LEN]
+            #indexes[poly_id]['last_ndvi'] = indexes[poly_id][index_name]
         if all_indexes is None:
             all_indexes = indexes
         else:

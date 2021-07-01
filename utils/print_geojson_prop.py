@@ -1,7 +1,9 @@
-from define import GEOJSON_DIR
+from define import GEOJSON_DIR, GEOJSON_NAME
 import geojson
+import os
 
-with open(GEOJSON_DIR, 'r') as f:
+
+with open(os.path.join(GEOJSON_DIR, GEOJSON_NAME), 'r') as f:
     geojson_dict = geojson.load(f)
 
 print(geojson_dict['features'][0]['properties'])

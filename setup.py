@@ -1,7 +1,17 @@
 import os
 import sqlite3
-from define import INDEXES_NAMES
+from define import INDEXES_NAMES, GEOJSON_DIR, OLD_RESULTS_DIR, RESULTS_DIR
 from define import DB_DIR
+
+
+def create_directories():
+    """ create geojson dir """
+    if not os.path.exists(RESULTS_DIR):
+        os.makedirs(RESULTS_DIR)
+    if not os.path.exists(OLD_RESULTS_DIR):
+        os.makedirs(OLD_RESULTS_DIR)
+    if not os.path.exists(GEOJSON_DIR):
+        os.makedirs(GEOJSON_DIR)
 
 
 def create_asset_done_table(conn=sqlite3.connect(DB_DIR)):
@@ -31,6 +41,7 @@ def upload_polygons_to_gee():
 
 
 def create_db():
+    create_directories()
     create_indexes_tables()
     create_asset_done_table()
     create_polygons_table_to_db()

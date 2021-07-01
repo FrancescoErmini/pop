@@ -24,7 +24,7 @@
     function getColor(ndviIndexes){
         if (ndviIndexes && ndviIndexes.length > 0 && parseFloat(ndviIndexes[0])){
             ndviLastIndex = parseFloat(ndviIndexes[0]);
-            if (ndviLastIndex > 1){
+            if (ndviLastIndex >= 0.5){
                 return "#00FF00"; // green
             }
             else if (ndviLastIndex < 0.5){
