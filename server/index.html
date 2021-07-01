@@ -12,6 +12,29 @@
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
   <style>
         #mapid { height: 600px; }
+
+        .ndvi-table {
+          font-family: Arial, Helvetica, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+
+        .ndvi-table td, #customers th {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+
+        .ndvi-table tr:nth-child(even){background-color: #f2f2f2;}
+
+        .ndvi-table tr:hover {background-color: #ddd;}
+
+        .ndvi-table th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: left;
+          background-color: #04AA6D;
+          color: white;
+        }
     </style>
 
 </head>
@@ -20,7 +43,26 @@
 
 
 <div id="mapid"></div>
+
+ <div id="tableData"></div>
+
+
 <script>
+    function getHTMLTableForNdvi(data){
+        //data =  {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
+        ndvi_data = data.ndvi;
+        ndvi_table = '<table class="ndvi-table"><tr><th>data</th><th>valore</th>';
+
+        for ( r in ndvi_data ){
+            row = ndvi_data[r];
+            ndvi_table += `<tr><td>${row[1]}</td><td>${row[0]}</td></tr>`;
+        }
+        ndvi_table += '</table>';
+        //console.log(ndvi_table);
+        //document.getElementById('tableData').innerHTML = ndvi_table;
+        return ndvi_table;
+    }
+
     function getColor(ndviIndexes){
         if (ndviIndexes && ndviIndexes.length > 0 && parseFloat(ndviIndexes[0])){
             ndviLastIndex = parseFloat(ndviIndexes[0]);
@@ -48,11 +90,14 @@
           zoomOffset: -1
       });
 
+
+
+
     $.getJSON("pop.geojson", function(data) {
 
         function onEachFeature(feature, layer) {
             //console.log('bynd layer' + JSON.stringify(feature.properties));
-            layer.bindPopup("prop: " + JSON.stringify(feature.properties));
+            layer.bindPopup(getHTMLTableForNdvi(feature.properties));
         }
 
         var geojson = L.geoJson(data, {
@@ -63,9 +108,50 @@
         var mymap = L.map('mapid').setView(new L.LatLng(44.737, 10), 7);//.fitBounds(geojson.getBounds());
         mapTiles.addTo(mymap);
         geojson.addTo(mymap);
+        autoZoom(mymap);
     });
+
+    function autoZoom(mymap){
+        mymap.locate({setView: true, maxZoom: 16});
+
+        function onLocationFound(e) {
+            var radius = e.accuracy;
+
+            L.marker(e.latlng).addTo(mymap)
+                .bindPopup("You are within " + radius + " meters from this point").openPopup();
+
+            L.circle(e.latlng, radius).addTo(mymap);
+        }
+
+        mymap.on('locationfound', onLocationFound);
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+        mymap.on('locationerror', onLocationError);
+    }
+
+
 
 </script>
 
+
+<script>
+function getHTMLTableForNdvi(data){
+    //data =  {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
+    ndvi_data = data.ndvi;
+    ndvi_table = '<table class="ndvi-table"><tr><th>data</th><th>valore</th>';
+
+    for ( r in ndvi_data ){
+        row = ndvi_data[r];
+        ndvi_table += `<tr><td>${row[1]}</td><td>${row[0]}</td></tr>`;
+    }
+    ndvi_table += '</table>';
+    //console.log(ndvi_table);
+    //document.getElementById('tableData').innerHTML = ndvi_table;
+    return ndvi_table;
+}
+</script>
 
 </body></html>
