@@ -4,6 +4,8 @@ import csv
 import sys
 import sqlite3
 
+from define import DB_DIR
+
 
 def save_csv_to_db(file_name):
     """
@@ -21,7 +23,7 @@ def save_csv_to_db(file_name):
         csv must have 3 column named: poly_id, value, datetime.
 
     """
-    conn = sqlite3.connect('../pop.sqlite')
+    conn = sqlite3.connect(DB_DIR)
     cur = conn.cursor()
     try:
 

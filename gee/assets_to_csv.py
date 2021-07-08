@@ -5,8 +5,6 @@ from gee.fc_to_dict import fc_to_dict
 from define import RESULTS_DIR, PADDING_VALUE, INDEXES_NAMES
 from define import GEE_POLY_ID
 
-#ee.Initialize()
-
 
 def save_gee_asset_to_csv(asset_name: str):
     """

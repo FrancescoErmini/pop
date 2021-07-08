@@ -2,6 +2,10 @@ import random
 import time
 import csv
 
+"""
+Fake CSV file generation for testing purpose
+"""
+
 
 test_values = []
 

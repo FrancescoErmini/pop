@@ -13,5 +13,5 @@ def has_valid_asset_name(asset_name):
             raise ValueError("Index name not defined")
         return True
     except Exception:
-        print("not valid asset: " + asset_name)
+        # print("not valid asset: " + asset_name)
         return False

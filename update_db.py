@@ -7,11 +7,11 @@ STORAGE ROUTINE:
 import os
 import shutil
 from storage.save_csv_to_db import save_csv_to_db
-from storage.update_geojson import update_geojson
 from define import RESULTS_DIR, OLD_RESULTS_DIR
+from datetime import date
 
 
-def main():
+def update_db():
     # 1. check if there are new files
     results_files = [f for f in os.listdir(RESULTS_DIR) if f.endswith('.csv') and len(f.split('_')) > 0]
 
@@ -24,11 +24,8 @@ def main():
 
     # 3. move files on old folder
     for result_file in results_files:
-        shutil.move(os.path.join(RESULTS_DIR, result_file), os.path.join(OLD_RESULTS_DIR, result_file))
+        today = date.today().strftime("%Y-%m-%d")
+        os.mkdir(os.path.join(OLD_RESULTS_DIR, today))
+        shutil.move(os.path.join(RESULTS_DIR, result_file), os.path.join(OLD_RESULTS_DIR,  today, result_file))
 
-    # update geojson
-    #update_geojson()
 
-
-if __name__ == "__main__":
-    main()
