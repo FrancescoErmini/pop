@@ -8,7 +8,7 @@ import os
 import shutil
 from storage.save_csv_to_db import save_csv_to_db
 from define import RESULTS_DIR, OLD_RESULTS_DIR
-from datetime import date
+from datetime import datetime
 
 
 def update_db():
@@ -24,8 +24,7 @@ def update_db():
 
     # 3. move files on old folder
     for result_file in results_files:
-        today = date.today().strftime("%Y-%m-%d")
-        os.mkdir(os.path.join(OLD_RESULTS_DIR, today))
+        today = datetime.now().strftime("%Y-%m-%d-%H%M")
+        if not os.path.exists(os.path.join(OLD_RESULTS_DIR, today)):
+            os.mkdir(os.path.join(OLD_RESULTS_DIR, today))
         shutil.move(os.path.join(RESULTS_DIR, result_file), os.path.join(OLD_RESULTS_DIR,  today, result_file))
-
-

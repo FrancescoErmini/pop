@@ -6,19 +6,19 @@ def add_ndvi(image):
 
 
 def add_ri(image):
-    return image.addBands(image.normalizedDifference(['B5', 'B3']).rename('RI'))
+    return image.addBands(image.normalizedDifference(['B5', 'B3']).rename('ri'))
 
 
 def add_nbr(image):
-    return image.addBands(image.normalizedDifference(['B9', 'B12']).rename('NBR'))
+    return image.addBands(image.normalizedDifference(['B9', 'B12']).rename('nbr'))
 
 
 def add_gndvi(image):
-    return image.addBands(image.normalizedDifference(['B9', 'B3']).rename('GNDVI'))
+    return image.addBands(image.normalizedDifference(['B9', 'B3']).rename('gndvi'))
 
 
 def add_re2(image):
-    return image.addBands(image.normalizedDifference(['B5', 'B4']).rename('RE2'))
+    return image.addBands(image.normalizedDifference(['B5', 'B4']).rename('re2'))
 
 
 def add_evi(image):
@@ -28,7 +28,7 @@ def add_evi(image):
             'RED': image.select('B4'),
             'BLUE': image.select('B2')
         })
-    return image.addBands((evi).rename('EVI'))
+    return image.addBands((evi).rename('evi'))
 
 
 def add_re1(image):
@@ -37,7 +37,7 @@ def add_re1(image):
             'NIR': image.select('B8'),
             'GREEN': image.select('B4'),
         })
-    return image.addBands((cvi).rename('RE1'))
+    return image.addBands((cvi).rename('re1'))
 
 
 def add_cvi(image):
@@ -46,7 +46,7 @@ def add_cvi(image):
             'RED': image.select('B5'),
             'GREEN': image.select('B3'),
         })
-    return image.addBands((cvi).rename('CVI'))
+    return image.addBands((cvi).rename('cvi'))
 
 
 def add_grvi(image):
@@ -55,7 +55,7 @@ def add_grvi(image):
             'NIR': image.select('B9'),
             'GREEN': image.select('B3'),
         })
-    return image.addBands((cvi).rename('GRVI'))
+    return image.addBands((cvi).rename('grvi'))
 
 
 def add_rvi(image):
@@ -64,7 +64,7 @@ def add_rvi(image):
             'NIR': image.select('B8'),
             'GREEN': image.select('B4'),
         })
-    return image.addBands((cvi).rename('RVI'))
+    return image.addBands((cvi).rename('rvi'))
 
 
 def add_ci_green(image):
@@ -73,7 +73,7 @@ def add_ci_green(image):
             'NIR': image.select('B9'),
             'GREEN': image.select('B3'),
         })
-    return image.addBands((cvi).rename('CIgreen'))
+    return image.addBands((cvi).rename('ci_green'))
 
 
 def add_ci(image):
@@ -82,7 +82,7 @@ def add_ci(image):
             'RED': image.select('B5'),
             'BLUE': image.select('B1'),
         })
-    return image.addBands((cvi).rename('CI'))
+    return image.addBands((cvi).rename('ci'))
 
 
 def cloud_mask(image):
@@ -94,7 +94,19 @@ def cloud_mask(image):
 def get_image_collection(geometry, start_date: str, end_date: str):
     return ee.ImageCollection('COPERNICUS/S2_SR')\
         .filterDate(start_date, end_date)\
-        .filterBounds(geometry) \
-        .map(lambda f: cloud_mask(f))\
-        .map(lambda f: add_ndvi(f))
+        .filterBounds(geometry)\
+        .map(lambda img: cloud_mask(img))\
+        .map(lambda img: add_ndvi(img))\
+        .map(lambda img: add_nbr(img))\
+        .map(lambda img: add_ri(img))\
+        .map(lambda img: add_gndvi(img))\
+        .map(lambda img: add_evi(img))\
+        .map(lambda img: add_re1(img))\
+        .map(lambda img: add_re2(img))\
+        .map(lambda img: add_cvi(img))\
+        .map(lambda img: add_grvi(img))\
+        .map(lambda img: add_rvi(img)) \
+        .map(lambda img: add_ci(img))\
+        .map(lambda img: add_ci_green(img))
+        
 

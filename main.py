@@ -4,13 +4,14 @@ from fetch_gee_results import fetch_gee_results
 from run_gee_tasks import run_gee_tasks
 from update_db import update_db
 from update_geojson import update_geojson
+from define import IMAGE_COLLECTION_ACQUISITION_DAYS
 
 
 def main():
     today = date.today()
     to_date = today.strftime("%Y-%m-%d")
     print(to_date)
-    from_date = (today - timedelta(5)).strftime("%Y-%m-%d")
+    from_date = (today - timedelta(IMAGE_COLLECTION_ACQUISITION_DAYS)).strftime("%Y-%m-%d")
     print(from_date)
     run_gee_tasks(from_date, to_date)
     fetch_gee_results()

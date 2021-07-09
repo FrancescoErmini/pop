@@ -1,5 +1,5 @@
 import sqlite3
-from define import INDEXES_NAMES, PADDING_VALUE, INDEX_MAX_LEN, DB_DIR
+from define import INDEXES_NAMES, REDUCE_REGION_NULL_VALUE, INDEX_MAX_LEN, DB_DIR
 from mergedeep import merge
 
 
@@ -32,7 +32,7 @@ def get_indexes(conn=sqlite3.connect(DB_DIR)):
                 indexes[poly_id][index_name].append((value, datetime))
         for poly_id in indexes.keys():
             # filter null values
-            indexes[poly_id][index_name] = [tup for tup in indexes[poly_id][index_name] if str(tup[0]) != str(PADDING_VALUE)+'.0']
+            indexes[poly_id][index_name] = [tup for tup in indexes[poly_id][index_name] if str(tup[0]) != str(REDUCE_REGION_NULL_VALUE) + '.0']
             #sort array of value by datetime value
             indexes[poly_id][index_name] = sorted(indexes[poly_id][index_name], key=lambda tup: int(tup[1]), reverse=True)
             # truncate array on max

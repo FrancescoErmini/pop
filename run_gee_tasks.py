@@ -4,7 +4,9 @@ from gee.get_feature_collection import get_feature_collection
 from gee.get_image_collection import get_image_collection
 from gee.reduce_regions import get_index_table
 from datetime import datetime
-from define import GEE_SRC_ASSET_NAME
+from define import GEE_SRC_ASSET_NAME, TASK_POLL_INTERVAL_SEC
+from define import INDEXES_NAMES
+
 
 ee.Initialize()
 
@@ -38,19 +40,24 @@ def run_gee_tasks(startDate: str, endDate: str):
     geometry = aoi_fc.geometry()
     # get satellite images
     image_collection = get_image_collection(geometry, startDate, endDate)
-    # TODO: in case of refactoring use a for cycle here to loop over all INDEXES (ndvi, ri, gndvi..)
-    # TODO: refactor function to handle index name dynamically
-    table = get_index_table(image_collection, aoi_fc)
-    table_name = "ndvi_" + startDate.replace("-", "") + "-" + endDate.replace("-", "") + "T" + datetime.now().strftime("%Y%m%d-%H%M")
-    task = ee.batch.Export.table.toAsset(
-        collection=table,
-        description=table_name,
-        assetId="users/pop/"+table_name)
+    tasks = []
+    for index_name in INDEXES_NAMES:
+        # compute the index value for all features
+        table = get_index_table(image_collection, aoi_fc, index_name)
+        table_name = f"{index_name}_" + startDate.replace("-", "") + "-" + endDate.replace("-", "") + "T" + datetime.now().strftime("%Y%m%d-%H%M")
+        task = ee.batch.Export.table.toAsset(
+            collection=table,
+            description=table_name,
+            assetId="users/pop/"+table_name)
+        tasks.append(task)
 
-    task.start()
+    # start all tasks
+    for task in tasks:
+        task.start()
 
-    while task.active():
-        print('Polling for task (id: %s).' % task.id)
-        time.sleep(5)
+    while all([task.active() for task in tasks]):
+        print('Tasks to finish: ' + ', '.join([task.id for task in tasks if task.active()]))
+        print('wait ' + str(TASK_POLL_INTERVAL_SEC) + ' seconds..')
+        time.sleep(TASK_POLL_INTERVAL_SEC)
 
 

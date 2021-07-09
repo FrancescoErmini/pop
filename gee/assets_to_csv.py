@@ -2,7 +2,7 @@ import os
 import ee
 import pandas as pd
 from gee.fc_to_dict import fc_to_dict
-from define import RESULTS_DIR, PADDING_VALUE, INDEXES_NAMES
+from define import RESULTS_DIR, REDUCE_REGION_NULL_VALUE, INDEXES_NAMES
 from define import GEE_POLY_ID
 
 
@@ -51,7 +51,7 @@ def save_gee_asset_to_csv(asset_name: str):
         # add null / -99999 padding to have all arrays of values of the same length.
         cur_array_len = len(pdsi_dict[prop])
         if cur_array_len < array_len:
-            pdsi_dict[prop] += [PADDING_VALUE for i in range(array_len - cur_array_len)]
+            pdsi_dict[prop] += [REDUCE_REGION_NULL_VALUE for i in range(array_len - cur_array_len)]
         # check that array have really the correct length
         if len(pdsi_dict[prop]) != array_len:
             raise Exception("Padding error")

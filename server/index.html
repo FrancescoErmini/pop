@@ -13,28 +13,69 @@
   <style>
         #mapid { height: 600px; }
 
-        .ndvi-table {
+        .index-table {
           font-family: Arial, Helvetica, sans-serif;
           border-collapse: collapse;
           width: 100%;
         }
 
-        .ndvi-table td, #customers th {
+        .index-table td, #customers th {
           border: 1px solid #ddd;
           padding: 8px;
         }
 
-        .ndvi-table tr:nth-child(even){background-color: #f2f2f2;}
+        .index-table tr:nth-child(even){background-color: #f2f2f2;}
 
-        .ndvi-table tr:hover {background-color: #ddd;}
+        .index-table tr:hover {background-color: #ddd;}
 
-        .ndvi-table th {
+        .index-table th {
           padding-top: 12px;
           padding-bottom: 12px;
           text-align: left;
           background-color: #04AA6D;
           color: white;
         }
+    </style>
+    <style>
+         /* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+
+.tabcontent-ndvi {
+
+}
     </style>
 
 </head>
@@ -63,13 +104,83 @@
         return ndvi_table;
     }
 
+    function getHTMLTableForIndex(data, index_name){
+        /*
+        index_name: the name of the index.
+        data =  the json of indexes for this poly
+
+        Example of data:
+        {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
+        */
+
+        index_data = data[index_name];
+        index_table = `<table class="index-table ${index_name}-table"><tr><th>data</th><th>valore</th>`;
+
+        for ( r in index_data ){
+            row = index_data[r];
+            index_table += `<tr><td>${row[1]}</td><td>${row[0]}</td></tr>`;
+        }
+        index_table += '</table>';
+        return index_table;
+    }
+
+    function createIndexesTables(data){
+        // get the poly id
+        let poly_id = JSON.stringify(data['poly_id']);
+        // create Tab menu with indexes names
+        let tab_menu = '<div class="tab">';
+        let tab_content = '';
+        let tablinks_class = `tablinks-${poly_id}`;
+        let tabcontent_class = `tabcontent-${poly_id}`;
+        let all_keys =  Object.keys(data);
+        for ( i in all_keys){
+            let index_name = all_keys[i]; // key will be ndvi, gndvi..
+            let tab_id = `${index_name}-${poly_id}`;
+            if ( index_name === 'poly_id' ){continue;}
+            tab_menu += `<button class="${tablinks_class}" onclick="openTab(event, '${tablinks_class}', '${tabcontent_class}', '${tab_id}')"> ${index_name} </button>`;
+            let tabcontent_classes = `tabcontent tabcontent-${index_name} ${tabcontent_class}`;
+            if ( index_name === 'ndvi' ) tabcontent_classes += ' active';
+            tab_content += `<div id="${tab_id}" class="${tabcontent_classes}">`;
+            tab_content +=  getHTMLTableForIndex(data, `${index_name}`);
+            tab_content +=  '</div>';
+        }
+        tab_menu += '</div>';
+
+        // create tab content
+
+        return tab_menu + tab_content;
+
+    }
+
+
+    function openTab(evt, tablinks_class, tabcontent_class, tab_id) {
+      // Declare all variables
+      var i, tabcontent, tablinks;
+
+      // Get all elements with class="tabcontent" and hide them
+      tabcontent = document.getElementsByClassName(tabcontent_class);
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName(tablinks_class);
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(tab_id).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
     function getColor(ndviIndexes){
         if (ndviIndexes && ndviIndexes.length > 0 && parseFloat(ndviIndexes[0])){
             ndviLastIndex = parseFloat(ndviIndexes[0]);
-            if (ndviLastIndex >= 0.5){
+            if (ndviLastIndex >= 0.6){
                 return "#00FF00"; // green
             }
-            else if (ndviLastIndex < 0.5){
+            else if (ndviLastIndex < 0.6){
                 return "#FF0000"; // red
             }
             else {
@@ -97,7 +208,8 @@
 
         function onEachFeature(feature, layer) {
             //console.log('bynd layer' + JSON.stringify(feature.properties));
-            layer.bindPopup(getHTMLTableForNdvi(feature.properties));
+            layer.bindPopup(createIndexesTables(feature.properties));
+            //layer.bindPopup(JSON.stringify(feature.properties));
         }
 
         var geojson = L.geoJson(data, {
