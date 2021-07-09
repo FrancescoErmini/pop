@@ -2,7 +2,7 @@ import time
 import ee
 from gee.get_feature_collection import get_feature_collection
 from gee.get_image_collection import get_image_collection
-from gee.reduce_regions import get_ndvi_table
+from gee.reduce_regions import get_index_table
 from datetime import datetime
 from define import GEE_SRC_ASSET_NAME
 
@@ -40,7 +40,7 @@ def run_gee_tasks(startDate: str, endDate: str):
     image_collection = get_image_collection(geometry, startDate, endDate)
     # TODO: in case of refactoring use a for cycle here to loop over all INDEXES (ndvi, ri, gndvi..)
     # TODO: refactor function to handle index name dynamically
-    table = get_ndvi_table(image_collection, aoi_fc)
+    table = get_index_table(image_collection, aoi_fc)
     table_name = "ndvi_" + startDate.replace("-", "") + "-" + endDate.replace("-", "") + "T" + datetime.now().strftime("%Y%m%d-%H%M")
     task = ee.batch.Export.table.toAsset(
         collection=table,

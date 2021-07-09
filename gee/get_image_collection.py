@@ -1,107 +1,88 @@
 import ee
-"""
-// funzione per calcolare RI per tutte le immagini della collection
-var addRI = function(image) {
-return image.addBands(image.normalizedDifference(['B5', 'B3']).rename('RI'));
-};
-
-//funzione per calcolare NBR
-var addNBR = function(image) {
-return image.addBands(image.normalizedDifference(['B9', 'B12']).rename('NBR'));
-};
-
-//funzione per calcolare GNDVI
-var addGNDVI = function(image) {
-return image.addBands(image.normalizedDifference(['B9', 'B3']).rename('GNDVI'));
-};
-
-//funzione per calcolare RE2
-var addRE_2 = function(image) {
-return image.addBands(image.normalizedDifference(['B5', 'B4']).rename('RE2'));
-};
-
-//funzione per calcolare EVI
-var addEVI = function(image) {
-var evi = image.expression(
-    '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'NIR': image.select('B8'),  // si seleziona la banda
-      'RED': image.select('B4'),  // si seleziona la banda
-      'BLUE': image.select('B2')
-});
-return image.addBands((evi).rename('EVI'));
-};
-
-// Funzione per calcolare Chlorophyll vegetation index CVI
-// quando si scrive la formula con le lettere ricordarsi di lasciare lo spazio tra il nome e l'operatore matematico
-var addCVI = function(image) {
-var cvi = image.expression(
-    '(NIR)*(RED / (GREEN * GREEN))', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'NIR': image.select('B9'),  // si seleziona la banda
-      'RED': image.select('B5'),  // si seleziona la banda
-      'GREEN': image.select('B3'),  // si seleziona la banda
-});
-return image.addBands((cvi).rename('CVI'));
-};
-
-//Funzione per calcolare il Chlorophyll index green
-var addCIgreen = function(image) {
-var cvi = image.expression(
-    '(((NIR)/(GREEN) ) -1 )', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'NIR': image.select('B9'),  // si seleziona la banda
-      'GREEN': image.select('B3'),  // si seleziona la banda
-});
-return image.addBands((cvi).rename('CIgreen'));
-};
-
-//Funzione per calcolare  il Coloration Index
-var addCI = function(image) {
-var cvi = image.expression(
-    '(RED - BLUE ) / RED', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'RED': image.select('B5'),  // si seleziona la banda
-      'BLUE': image.select('B1'),  // si seleziona la banda
-});
-return image.addBands((cvi).rename('CI'));
-};
 
 
-//Funzione per calcolare  il Coloration Index
-var addRE_1 = function(image) {
-var cvi = image.expression(
-    'RE1 / RE2', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'RE1': image.select('B5'),  // si seleziona la banda
-      'RE2': image.select('B4'),  // si seleziona la banda
-});
-return image.addBands((cvi).rename('RE1'));
-};
-
-
-//Funzione per calcolare  il RVI
-var addRVI = function(image) {
-var cvi = image.expression(
-    'NIR / GREEN', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'NIR': image.select('B8'),  // si seleziona la banda
-      'GREEN': image.select('B4'),  // si seleziona la banda
-});
-return image.addBands((cvi).rename('RVI'));
-};
-
-
-//Funzione per calcolare  GRVI
-var addGRVI = function(image) {
-var cvi = image.expression(
-    'NIR / GREEN', { // si scrive la formula come si trova sul sito degli indici Sentinel https://custom-scripts.sentinel-hub.com/custom-scripts/sentinel-2/indexdb/
-      'NIR': image.select('B9'),  // si seleziona la banda
-      'GREEN': image.select('B3'),  // si seleziona la banda
-});
-return image.addBands((cvi).rename('GRVI'));
-};
-
-
-"""
-
-
-def addNDVI(image):
+def add_ndvi(image):
     return image.addBands(image.normalizedDifference(['B8', 'B4']).rename('ndvi'))
+
+
+def add_ri(image):
+    return image.addBands(image.normalizedDifference(['B5', 'B3']).rename('RI'))
+
+
+def add_nbr(image):
+    return image.addBands(image.normalizedDifference(['B9', 'B12']).rename('NBR'))
+
+
+def add_gndvi(image):
+    return image.addBands(image.normalizedDifference(['B9', 'B3']).rename('GNDVI'))
+
+
+def add_re2(image):
+    return image.addBands(image.normalizedDifference(['B5', 'B4']).rename('RE2'))
+
+
+def add_evi(image):
+    evi = image.expression(
+        '2.5 * ((NIR - RED) / (NIR + 6 * RED - 7.5 * BLUE + 1))', {
+            'NIR': image.select('B8'),
+            'RED': image.select('B4'),
+            'BLUE': image.select('B2')
+        })
+    return image.addBands((evi).rename('EVI'))
+
+
+def add_re1(image):
+    cvi = image.expression(
+        'NIR / GREEN', {
+            'NIR': image.select('B8'),
+            'GREEN': image.select('B4'),
+        })
+    return image.addBands((cvi).rename('RE1'))
+
+
+def add_cvi(image):
+    cvi = image.expression('(NIR)*(RED / (GREEN * GREEN))', {
+            'NIR': image.select('B9'),
+            'RED': image.select('B5'),
+            'GREEN': image.select('B3'),
+        })
+    return image.addBands((cvi).rename('CVI'))
+
+
+def add_grvi(image):
+    cvi = image.expression(
+        'NIR / GREEN', {
+            'NIR': image.select('B9'),
+            'GREEN': image.select('B3'),
+        })
+    return image.addBands((cvi).rename('GRVI'))
+
+
+def add_rvi(image):
+    cvi = image.expression(
+        'NIR / GREEN', {
+            'NIR': image.select('B8'),
+            'GREEN': image.select('B4'),
+        })
+    return image.addBands((cvi).rename('RVI'))
+
+
+def add_ci_green(image):
+    cvi = image.expression(
+        '(((NIR)/(GREEN) ) -1 )', {
+            'NIR': image.select('B9'),
+            'GREEN': image.select('B3'),
+        })
+    return image.addBands((cvi).rename('CIgreen'))
+
+
+def add_ci(image):
+    cvi = image.expression(
+        '(RED - BLUE ) / RED', {
+            'RED': image.select('B5'),
+            'BLUE': image.select('B1'),
+        })
+    return image.addBands((cvi).rename('CI'))
 
 
 def cloud_mask(image):
@@ -115,5 +96,5 @@ def get_image_collection(geometry, start_date: str, end_date: str):
         .filterDate(start_date, end_date)\
         .filterBounds(geometry) \
         .map(lambda f: cloud_mask(f))\
-        .map(lambda f: addNDVI(f))
+        .map(lambda f: add_ndvi(f))
 

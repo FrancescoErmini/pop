@@ -10,6 +10,8 @@ GEOJSON_DIR = os.path.join(BASE_DIR, 'geojson')
 RESULTS_DIR = os.path.join(BASE_DIR, 'results')
 OLD_RESULTS_DIR = os.path.join(BASE_DIR, 'old_results')
 
+REDUCE_REGIONS_SCALE = 10
+REDUCE_REGION_NULL_VALUE = -999999
 
 #INDEXES_NAMES = ['ndvi', 'ri', 'ci', 'cigreen', 'cvi', 'evi', 'gndvi', 'grvi', 'nbr', 're1', 're2']
 INDEXES_NAMES = ['ndvi']
