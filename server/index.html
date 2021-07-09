@@ -11,7 +11,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
     <script src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
   <style>
-        #mapid { height: 600px; }
+        #mapid { height: 100%; min-height: 600px;}
 
         .index-table {
           font-family: Arial, Helvetica, sans-serif;
@@ -89,28 +89,24 @@
 
 
 <script>
-    function getHTMLTableForNdvi(data){
-        //data =  {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
-        ndvi_data = data.ndvi;
-        ndvi_table = '<table class="ndvi-table"><tr><th>data</th><th>valore</th>';
-
-        for ( r in ndvi_data ){
-            row = ndvi_data[r];
-            ndvi_table += `<tr><td>${row[1]}</td><td>${row[0]}</td></tr>`;
-        }
-        ndvi_table += '</table>';
-        //console.log(ndvi_table);
-        //document.getElementById('tableData').innerHTML = ndvi_table;
-        return ndvi_table;
-    }
 
     function getHTMLTableForIndex(data, index_name){
         /*
-        index_name: the name of the index.
-        data =  the json of indexes for this poly
+        Create the html of the table to use in pop-up, so that
+        when a user click on a polygon on the map, it pop-up
+        this table of values for the index specified in input.
+
+        index_name: the name of the index used to build the table.
+        data =  the  full json of indexes for one polygon.
 
         Example of data:
-        {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
+        data: {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
+        index_name: 'ndvi'
+
+        Return the html code of the table with all index date/value.
+            date      |   ndvi
+           2020-01-01 |   0.3
+
         */
 
         index_data = data[index_name];
@@ -130,7 +126,28 @@
     }
 
     function createIndexesTables(data){
-        // get the poly id
+        /*
+        Create the html of the whole pop-up.
+        Create tabs box, with one tab per index_name.
+        When one tab is selected, the user view the table relative to this tab.
+
+        data: the full json for one polygon.
+        Return ( for poly_id = 123 )
+
+
+
+        <h2> poly 123 </h2>
+        <div class="tab">
+          <button class="tablinks-123" onclick="openTab(event, 'tablinks-123', 'tabcontent-123', 'ndvi-123')">ndvi</button>
+          <button class="tablinks-123" onclick=" openTab(event, 'tablinks-123', 'tabcontent-123', 'gndvi-123')">gndvi</button>
+        </div>
+
+        <div id="ndvi-3377" class="tabcontent tabcontent-ndvi tabcontent-3377" style="display: block;"> .. </div>
+        <div id="gndvi-3377" class="tabcontent tabcontent-gndvi tabcontent-3377" style="display: block;"> .. </div>
+
+        */
+
+        // get the poly id, use it to differentiate html classes
         let poly_id = JSON.stringify(data['poly_id']);
         let header = `<h2>Polygon ID: ${poly_id}</h2>`
         // create Tab menu with indexes names
@@ -157,14 +174,17 @@
         }
         tab_menu += '</div>';
 
-        // create tab content
-
+        // assemble the full html string
         return header + tab_menu + tab_content;
 
     }
 
 
     function openTab(evt, tablinks_class, tabcontent_class, tab_id) {
+       /*
+       Toggle tab visbility when the tab link is clicked.
+      */
+
       // Declare all variables
       var i, tabcontent, tablinks;
 
@@ -186,6 +206,9 @@
     }
 
     function getColor(ndviIndexes){
+        /*
+           Return the color to associate with an NDVI value.
+        */
         if (ndviIndexes && ndviIndexes.length > 0 && parseFloat(ndviIndexes[0])){
             ndviLastIndex = parseFloat(ndviIndexes[0]);
             if (ndviLastIndex >= 0.6){
@@ -212,8 +235,9 @@
           zoomOffset: -1
       });
 
-
-
+   var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
 
     $.getJSON("pop.geojson", function(data) {
 
@@ -232,6 +256,15 @@
         mapTiles.addTo(mymap);
         geojson.addTo(mymap);
         autoZoom(mymap);
+
+        // add more tiles
+		var baseLayers = {
+		    "mapTiles": mapTiles,
+			"Esri_WorldImagery": Esri_WorldImagery
+		};
+
+		 //Add baseLayers to map as control layers
+		 L.control.layers(baseLayers).addTo(mymap);
     });
 
     function autoZoom(mymap){
@@ -259,22 +292,5 @@
 
 </script>
 
-
-<script>
-function getHTMLTableForNdvi(data){
-    //data =  {"poly_id":3535,"ndvi":[["0.29516506479244975","20200127"],["0.31946809114003505","20200127"],["0.43579260192023606","20200127"],["0.29842954619832707","20200127"],["0.35936477901309816","20200127"],["0.3851075555322908","20200127"],["0.35758688665865884","20200127"],["0.496821200585559","20200127"],["0.394305984735928","20200127"],["0.37874767026815453","20200127"]]}
-    ndvi_data = data.ndvi;
-    ndvi_table = '<table class="ndvi-table"><tr><th>data</th><th>valore</th>';
-
-    for ( r in ndvi_data ){
-        row = ndvi_data[r];
-        ndvi_table += `<tr><td>${row[1]}</td><td>${row[0]}</td></tr>`;
-    }
-    ndvi_table += '</table>';
-    //console.log(ndvi_table);
-    //document.getElementById('tableData').innerHTML = ndvi_table;
-    return ndvi_table;
-}
-</script>
 
 </body></html>
