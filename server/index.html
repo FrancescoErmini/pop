@@ -1,6 +1,6 @@
 <html><head>
 
-	<title>Quick Start - Leaflet</title>
+	<title>Precision PoP</title>
 
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -114,11 +114,16 @@
         */
 
         index_data = data[index_name];
-        index_table = `<table class="index-table ${index_name}-table"><tr><th>data</th><th>valore</th>`;
+        index_table = `<table class="index-table ${index_name}-table"><tr><th>data</th><th>${index_name}</th>`;
 
         for ( r in index_data ){
             row = index_data[r];
-            index_table += `<tr><td>${row[1]}</td><td>${row[0]}</td></tr>`;
+            let date = row[1]; // format is 20210101
+            let year = date.substring(0,4);
+            let month = date.substring(4,6);
+            let day = date.substring(6,8);
+            let dateStr = `${year}-${month}-${day}`
+            index_table += `<tr><td>${dateStr}</td><td>${row[0]}</td></tr>`;
         }
         index_table += '</table>';
         return index_table;
@@ -127,6 +132,7 @@
     function createIndexesTables(data){
         // get the poly id
         let poly_id = JSON.stringify(data['poly_id']);
+        let header = `<h2>Polygon ID: ${poly_id}</h2>`
         // create Tab menu with indexes names
         let tab_menu = '<div class="tab">';
         let tab_content = '';
@@ -137,18 +143,23 @@
             let index_name = all_keys[i]; // key will be ndvi, gndvi..
             let tab_id = `${index_name}-${poly_id}`;
             if ( index_name === 'poly_id' ){continue;}
-            tab_menu += `<button class="${tablinks_class}" onclick="openTab(event, '${tablinks_class}', '${tabcontent_class}', '${tab_id}')"> ${index_name} </button>`;
+            let tab_is_active = '';
+            if ( index_name === 'ndvi' ) {tab_is_active = ' active';}
+            tab_menu += `<button class="${tablinks_class}${tab_is_active}" onclick="openTab(event, '${tablinks_class}', '${tabcontent_class}', '${tab_id}')"> ${index_name} </button>`;
             let tabcontent_classes = `tabcontent tabcontent-${index_name} ${tabcontent_class}`;
-            if ( index_name === 'ndvi' ) tabcontent_classes += ' active';
-            tab_content += `<div id="${tab_id}" class="${tabcontent_classes}">`;
+            let tabcontent_style = '';
+            if ( index_name === 'ndvi' ) tabcontent_style = 'display: block';
+            tab_content += `<div id="${tab_id}" class="${tabcontent_classes}" style="${tabcontent_style}">`;
+
             tab_content +=  getHTMLTableForIndex(data, `${index_name}`);
+
             tab_content +=  '</div>';
         }
         tab_menu += '</div>';
 
         // create tab content
 
-        return tab_menu + tab_content;
+        return header + tab_menu + tab_content;
 
     }
 
