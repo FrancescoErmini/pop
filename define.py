@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 DB_NAME = 'pop.sqlite'
 GEOJSON_NAME = 'pop.geojson'
 DB_DIR = os.path.join(BASE_DIR, DB_NAME)
-GEOJSON_DIR = os.path.join(BASE_DIR, 'server', 'geojson')
+GEOJSON_DIR = os.path.join(BASE_DIR, 'server')
 RESULTS_DIR = os.path.join(BASE_DIR, 'results')
 OLD_RESULTS_DIR = os.path.join(BASE_DIR, 'old_results')
 
