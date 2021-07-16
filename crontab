@@ -1,2 +1,5 @@
-#run python script every minutes
-* * * * * python /app/hello.py > /proc/1/fd/1 2>/proc/1/fd/2
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# run python script within docker every 5 days
+# CRON: 0 0 */5 * *  midnight every 5 days.
+0 0 */5 * * python /app/main.py > /proc/1/fd/1 2>/proc/1/fd/2
