@@ -2,7 +2,12 @@ pop
 .ipy*
 results
 old_results
+geojson
+source
 *.ipynb
 *.sqlite
+*.geojson
+*.csv
 __pycache__
 .idea
+.ipynb_checkpoints
